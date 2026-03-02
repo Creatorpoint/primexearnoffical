@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PrimeX Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-login" id="loginBox">
+<h2>🔐 Admin Login</h2>
+<input type="password" id="loginPass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+</div>
+
+<div class="admin-panel" id="adminPanel" style="display:none;">
+<h2>📌 Upload New Offer</h2>
+
+<input type="text" id="title" placeholder="Offer Title">
+<textarea id="desc" placeholder="Offer Description"></textarea>
+
+<label>Upload Image</label>
+<input type="file" id="imageFile" accept="image/*">
+
+<label>Upload Video</label>
+<input type="file" id="videoFile" accept="video/*">
+
+<input type="text" id="link" placeholder="Offer Link">
+
+<label>Expiry Date</label>
+<input type="date" id="expiry">
+
+<label>Rating (1-5)</label>
+<input type="number" id="rating" min="1" max="5">
+
+<label><input type="checkbox" id="featured"> Featured Offer</label>
+
+<button onclick="addOffer()">Publish Offer</button>
+
+<hr>
+<h3>🔑 Change Password</h3>
+<input type="password" id="currentPass" placeholder="Current Password">
+<input type="password" id="newPass" placeholder="New Password">
+<button onclick="changePassword()">Update Password</button>
+
+<hr>
+<h3>📊 Existing Offers</h3>
+<div id="adminOffers"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
