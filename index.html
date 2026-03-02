@@ -4,34 +4,142 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PrimeX Official Offers</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+}
+
+header{
+padding:20px;
+text-align:center;
+font-size:26px;
+font-weight:bold;
+}
+
+.buttons{
+text-align:center;
+margin-bottom:20px;
+}
+
+.buttons a{
+display:inline-block;
+margin:5px;
+padding:10px 18px;
+border-radius:25px;
+text-decoration:none;
+color:white;
+background:linear-gradient(45deg,#ff416c,#ff4b2b);
+font-weight:bold;
+}
+
+.offer-card{
+background:rgba(255,255,255,0.08);
+margin:15px;
+padding:15px;
+border-radius:15px;
+backdrop-filter:blur(10px);
+box-shadow:0 0 15px rgba(0,0,0,0.3);
+}
+
+.offer-card img, .offer-card video{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
+
+.join-btn{
+display:block;
+text-align:center;
+margin-top:10px;
+padding:10px;
+border-radius:20px;
+background:linear-gradient(45deg,#ff416c,#ff4b2b);
+color:white;
+text-decoration:none;
+font-weight:bold;
+}
+
+.popup{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:#111;
+padding:15px;
+border-radius:15px;
+width:90%;
+max-width:400px;
+text-align:center;
+box-shadow:0 0 15px black;
+}
+
+.popup button{
+margin-top:10px;
+padding:8px 15px;
+border:none;
+border-radius:15px;
+background:#ff4b2b;
+color:white;
+}
+</style>
 </head>
 <body>
 
-<header>
-<h1>🔥 PrimeX Official Offers</h1>
-</header>
+<header>🔥 PrimeX Official Offers</header>
 
-<section id="featured"></section>
-<section id="offers"></section>
-
-<!-- Sticky Telegram Bar -->
-<div class="sticky-bar">
-<a href="https://t.me/Primex_Shop07_Bot" target="_blank">📞 Contact</a>
-<a href="https://t.me/+iu2fM-K0fVczMTE9" target="_blank">📢 Channel</a>
-<a href="https://t.me/PRIME_X_CHAT2" target="_blank">💬 Chat</a>
+<div class="buttons">
+<a href="https://t.me/Primex_Shop07_Bot">📞 Contact</a>
+<a href="https://t.me/+iu2fM-K0fVczMTE9">📢 Channel</a>
+<a href="https://t.me/PRIME_X_CHAT2">💬 Chat</a>
 </div>
 
-<!-- Professional Popup -->
-<div class="popup" id="joinPopup">
-<div class="popup-box">
-<h2>🚀 Join PrimeX Channel</h2>
-<p>Daily New Premium Offers & Updates</p>
-<a href="https://t.me/+iu2fM-K0fVczMTE9" target="_blank">Join Now</a>
+<div id="offersContainer"></div>
+
+<div class="popup" id="popup">
+🚀 Join PrimeX Channel For Daily Premium Offers
+<br>
+<a href="https://t.me/+iu2fM-K0fVczMTE9" class="join-btn">Join Now</a>
 <button onclick="closePopup()">Close</button>
 </div>
-</div>
 
-<script src="script.js"></script>
+<script>
+let offers = JSON.parse(localStorage.getItem("primex_offers")) || [];
+
+function renderOffers(){
+const container = document.getElementById("offersContainer");
+container.innerHTML="";
+
+if(offers.length===0){
+container.innerHTML="<h3 style='text-align:center;'>No Offers Available</h3>";
+return;
+}
+
+offers.forEach(offer=>{
+const card=document.createElement("div");
+card.className="offer-card";
+
+card.innerHTML=`
+<h3>${offer.title}</h3>
+<p>${offer.description}</p>
+${offer.image ? `<img src="${offer.image}">` : ""}
+${offer.video ? `<video src="${offer.video}" controls></video>` : ""}
+<a href="${offer.link}" target="_blank" class="join-btn">🔥 Get Offer</a>
+`;
+
+container.appendChild(card);
+});
+}
+
+function closePopup(){
+document.getElementById("popup").style.display="none";
+}
+
+renderOffers();
+</script>
+
 </body>
 </html>
