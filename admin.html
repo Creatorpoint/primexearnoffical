@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-login" id="loginBox">
+<h2>Admin Login</h2>
+<input type="password" id="adminPass" placeholder="Enter Password">
+<button onclick="checkLogin()">Login</button>
+</div>
+
+<div class="admin-panel" id="adminPanel" style="display:none;">
+<h2>Add New Offer</h2>
+
+<input type="text" id="title" placeholder="Offer Title">
+<input type="text" id="image" placeholder="Image URL">
+<textarea id="desc" placeholder="Offer Description"></textarea>
+<input type="text" id="link" placeholder="Offer Link">
+
+<button onclick="addOffer()">Publish Offer</button>
+
+<h3>Existing Offers</h3>
+<div id="adminOffers"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
