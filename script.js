@@ -1,3 +1,43 @@
+// ===== ADMIN PASSWORD SYSTEM =====
+
+// Default password (first time only)
+if(!localStorage.getItem("adminPassword")){
+    localStorage.setItem("adminPassword","admin123");
+}
+
+function checkLogin(){
+let pass = document.getElementById("adminPass").value;
+let savedPass = localStorage.getItem("adminPassword");
+
+if(pass === savedPass){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("adminPanel").style.display="block";
+loadAdminOffers();
+}else{
+alert("❌ Wrong Password");
+}
+// Change Password
+function changePassword(){
+let current = document.getElementById("currentPass").value;
+let newPass = document.getElementById("newPass").value;
+
+let savedPass = localStorage.getItem("adminPassword");
+
+if(current !== savedPass){
+alert("❌ Current Password Incorrect");
+return;
+}
+
+if(newPass.length < 5){
+alert("⚠ Password must be at least 5 characters");
+return;
+}
+
+localStorage.setItem("adminPassword", newPass);
+alert("✅ Password Changed Successfully");
+document.getElementById("currentPass").value="";
+document.getElementById("newPass").value="";
+}
 let offers = JSON.parse(localStorage.getItem("offers")) || [];
 
 function saveOffers(){
