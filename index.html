@@ -1,23 +1,167 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Prime Offers</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrimeX Loot & Earning</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+header{
+background:linear-gradient(45deg,#ff512f,#dd2476);
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.channel{
+text-align:center;
+padding:10px;
+background:#1e293b;
+}
+
+.channel a{
+background:#ff512f;
+padding:8px 15px;
+border-radius:20px;
+color:white;
+text-decoration:none;
+font-weight:bold;
+}
+
+.container{
+padding:15px;
+}
+
+.card{
+background:#1e293b;
+border-radius:12px;
+margin-bottom:15px;
+overflow:hidden;
+box-shadow:0 0 10px rgba(0,0,0,0.4);
+}
+
+.card img{
+width:100%;
+}
+
+.card-body{
+padding:12px;
+}
+
+.card h3{
+margin:0;
+color:#facc15;
+}
+
+.join{
+display:block;
+margin-top:10px;
+background:#22c55e;
+padding:8px;
+border-radius:20px;
+text-align:center;
+color:white;
+text-decoration:none;
+font-weight:bold;
+}
+
+.popup{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+display:none;
+justify-content:center;
+align-items:center;
+}
+
+.popup-box{
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+text-align:center;
+width:300px;
+}
+
+</style>
 </head>
 <body>
 
-<header>🔥 Prime X Offers</header>
+<header>🔥 PrimeX Loot & Earning</header>
+
+<div class="channel">
+<a href="https://t.me/+iu2fM-K0fVczMTE9">📢 Join Channel</a>
+<a href="https://t.me/Primex_Shop07_Bot">💬 Contact</a>
+</div>
 
 <div class="container" id="offers"></div>
 
 <div class="popup" id="popup">
-  <div class="popup-content">
-    <h3>Offer Details</h3>
-    <p id="popupText"></p>
-    <button onclick="closePopup()">Close</button>
-  </div>
+<div class="popup-box">
+<h3>🚀 Join Channel First</h3>
+<p>Daily Loot & Earning Offers</p>
+<a class="join" href="https://t.me/+iu2fM-K0fVczMTE9">Join Now</a>
+<br>
+<button onclick="closePopup()">Close</button>
+</div>
 </div>
 
-<script src="script.js"></script>
+<script>
+
+let offers = JSON.parse(localStorage.getItem("offers")) || [];
+
+function render(){
+
+let container=document.getElementById("offers");
+container.innerHTML="";
+
+offers.forEach((o,i)=>{
+
+if(!o.active) return;
+
+container.innerHTML+=`
+
+<div class="card">
+
+${o.image ? `<img src="${o.image}">` : ``}
+
+<div class="card-body">
+
+<h3>${o.title}</h3>
+
+<p>${o.desc}</p>
+
+<a class="join" href="${o.link}" target="_blank">🔥 Grab Offer</a>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+function closePopup(){
+document.getElementById("popup").style.display="none";
+}
+
+setTimeout(()=>{
+document.getElementById("popup").style.display="flex";
+},4000);
+
+render();
+
+</script>
+
 </body>
 </html>
