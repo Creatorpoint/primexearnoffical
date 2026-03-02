@@ -1,110 +1,60 @@
-// ===== PASSWORD SYSTEM =====
-if (!localStorage.getItem("adminPass")) {
-  localStorage.setItem("adminPass", "PrimeX@123");
-}
+// Load Offers
+function loadOffers(){
+  const offers = JSON.parse(localStorage.getItem("offers")) || [];
+  const container = document.getElementById("offers");
 
-let offers = JSON.parse(localStorage.getItem("offers")) || [];
+  if(!container) return;
 
-function saveData() {
-  localStorage.setItem("offers", JSON.stringify(offers));
-}
+  container.innerHTML = "";
 
-// ===== LOGIN =====
-function login() {
-  let input = document.getElementById("loginPass").value;
-  if (input === localStorage.getItem("adminPass")) {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    loadAdmin();
-  } else {
-    alert("Wrong Password ❌");
-  }
-}
-
-// ===== CHANGE PASSWORD =====
-function changePassword() {
-  let current = document.getElementById("currentPass").value;
-  let newPass = document.getElementById("newPass").value;
-
-  if (current !== localStorage.getItem("adminPass")) {
-    alert("Current Password Wrong ❌");
-    return;
-  }
-
-  localStorage.setItem("adminPass", newPass);
-  alert("Password Updated ✅");
-}
-
-// ===== ADD OFFER =====
-function addOffer() {
-  let title = document.getElementById("title").value;
-  let desc = document.getElementById("desc").value;
-  let link = document.getElementById("link").value;
-  let expiry = document.getElementById("expiry").value;
-  let rating = document.getElementById("rating").value;
-  let featured = document.getElementById("featured").checked;
-
-  let imageFile = document.getElementById("imageFile").files[0];
-  let videoFile = document.getElementById("videoFile").files[0];
-
-  if (!imageFile) {
-    alert("Image Required ❌");
-    return;
-  }
-
-  let imageReader = new FileReader();
-  imageReader.onload = function (e) {
-    let imageData = e.target.result;
-
-    if (videoFile) {
-      let videoReader = new FileReader();
-      videoReader.onload = function (v) {
-        saveOffer(title, desc, link, expiry, rating, featured, imageData, v.target.result);
-      };
-      videoReader.readAsDataURL(videoFile);
-    } else {
-      saveOffer(title, desc, link, expiry, rating, featured, imageData, null);
-    }
-  };
-
-  imageReader.readAsDataURL(imageFile);
-}
-
-function saveOffer(title, desc, link, expiry, rating, featured, image, video) {
-  offers.push({
-    title,
-    desc,
-    link,
-    expiry,
-    rating,
-    featured,
-    image,
-    video,
-    clicks: 0
-  });
-
-  saveData();
-  alert("Offer Published Successfully 🚀");
-  location.reload();
-}
-
-// ===== LOAD ADMIN LIST =====
-function loadAdmin() {
-  let box = document.getElementById("adminOffers");
-  box.innerHTML = "";
-
-  offers.forEach((o, i) => {
-    box.innerHTML += `
-      <div class="admin-item">
-        <span>${o.title}</span>
-        <button onclick="deleteOffer(${i})">Delete</button>
+  offers.forEach((offer,index)=>{
+    container.innerHTML += `
+      <div class="card">
+        <img src="${offer.image}">
+        <h3>${offer.title}</h3>
+        <p class="price">₹${offer.price}</p>
+        <button onclick="showPopup('${offer.title}','${offer.price}')">
+          View Offer
+        </button>
       </div>
     `;
   });
 }
 
-function deleteOffer(i) {
-  offers.splice(i, 1);
-  saveData();
+// Add Offer (Admin)
+function addOffer(){
+  const title = document.getElementById("title").value;
+  const price = document.getElementById("price").value;
+  const image = document.getElementById("image").value;
+
+  if(!title || !price || !image){
+    alert("Fill all fields");
+    return;
+  }
+
+  const offers = JSON.parse(localStorage.getItem("offers")) || [];
+
+  offers.push({
+    title:title,
+    price:price,
+    image:image
+  });
+
+  localStorage.setItem("offers", JSON.stringify(offers));
+
+  alert("Offer Added Successfully ✅");
   location.reload();
 }
+
+// Popup
+function showPopup(title,price){
+  document.getElementById("popupText").innerHTML =
+  `${title} available at just ₹${price}`;
+  document.getElementById("popup").style.display="flex";
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+window.onload = loadOffers;
