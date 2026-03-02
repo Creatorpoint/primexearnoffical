@@ -13,7 +13,6 @@ background:#0f172a;
 color:white;
 }
 
-/* Animated Header */
 header{
 padding:20px;
 text-align:center;
@@ -29,7 +28,6 @@ animation:move 6s infinite;
 100%{background-position:0% 50%;}
 }
 
-/* Buttons */
 .top-buttons{
 text-align:center;
 padding:10px;
@@ -46,7 +44,6 @@ text-decoration:none;
 font-weight:bold;
 }
 
-/* Cards */
 .container{
 padding:15px;
 display:grid;
@@ -79,11 +76,11 @@ padding:10px;
 border-radius:20px;
 text-align:center;
 color:white;
-text-decoration:none;
+border:none;
 font-weight:bold;
+cursor:pointer;
 }
 
-/* Popup */
 .popup{
 position:fixed;
 top:0;
@@ -134,7 +131,6 @@ cursor:pointer;
 
 <div class="container" id="offers"></div>
 
-<!-- Popup -->
 <div class="popup" id="popup">
 <div class="popup-box">
 <h3>Join Our Channel 🚀</h3>
@@ -146,7 +142,16 @@ cursor:pointer;
 </div>
 
 <script>
+
 let offers = JSON.parse(localStorage.getItem("offers")) || [];
+
+function openOffer(link){
+if(!link) return alert("Invalid link");
+if(!link.startsWith("http")){
+link = "https://" + link;
+}
+window.open(link,"_blank");
+}
 
 function render(){
 let container=document.getElementById("offers");
@@ -160,7 +165,7 @@ ${o.mediaType==="video" ? `<video controls src="${o.media}"></video>` : ""}
 <div class="card-body">
 <h3>${o.title}</h3>
 <p>${o.desc}</p>
-<a class="join" href="${o.link}" target="_blank">🔥 Grab Offer</a>
+<button class="join" onclick="openOffer('${o.link}')">🔥 Grab Offer</button>
 </div>
 </div>
 `;
@@ -176,6 +181,7 @@ document.getElementById("popup").classList.add("active");
 },3000);
 
 render();
+
 </script>
 
 </body>
