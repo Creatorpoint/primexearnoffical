@@ -8,7 +8,7 @@ color:white;
 header{
 text-align:center;
 padding:20px;
-font-size:24px;
+font-size:22px;
 font-weight:bold;
 }
 
@@ -33,42 +33,22 @@ background:gold;
 color:black;
 padding:5px 10px;
 border-radius:10px;
-font-size:12px;
 }
 
-.offer-card img{
+.offer-card img,video{
 width:100%;
-border-radius:15px;
+border-radius:10px;
+margin-bottom:10px;
 }
 
-.claim-btn{
-margin-top:10px;
+button{
 width:100%;
-padding:12px;
+padding:10px;
 border:none;
 border-radius:10px;
 background:linear-gradient(45deg,#ff512f,#dd2476);
 color:white;
-font-weight:bold;
 cursor:pointer;
-}
-
-.claim-btn:hover{
-transform:scale(1.05);
-}
-
-.rating{
-margin-top:10px;
-}
-
-.countdown{
-margin-top:5px;
-color:#00ffcc;
-}
-
-.clicks{
-margin-top:5px;
-color:#ffd700;
 }
 
 .sticky-bar{
@@ -84,7 +64,6 @@ padding:10px;
 .sticky-bar a{
 color:white;
 text-decoration:none;
-font-weight:bold;
 }
 
 .popup{
@@ -93,13 +72,13 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.7);
 display:none;
 justify-content:center;
 align-items:center;
+background:rgba(0,0,0,0.7);
 }
 
-.popup-content{
+.popup-box{
 background:white;
 color:black;
 padding:20px;
