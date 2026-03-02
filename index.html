@@ -8,32 +8,40 @@
 <style>
 body{
 margin:0;
-font-family:Arial, sans-serif;
+font-family:Arial;
 background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 color:white;
 }
 
 header{
-padding:20px;
 text-align:center;
+padding:20px;
 font-size:26px;
 font-weight:bold;
 }
 
-.buttons{
+.top-buttons{
 text-align:center;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
-.buttons a{
+.top-buttons a{
 display:inline-block;
 margin:5px;
 padding:10px 18px;
 border-radius:25px;
-text-decoration:none;
-color:white;
 background:linear-gradient(45deg,#ff416c,#ff4b2b);
+color:white;
+text-decoration:none;
 font-weight:bold;
+}
+
+.featured{
+margin:15px;
+padding:15px;
+border-radius:15px;
+background:rgba(255,215,0,0.15);
+border:1px solid gold;
 }
 
 .offer-card{
@@ -65,7 +73,7 @@ font-weight:bold;
 
 .popup{
 position:fixed;
-bottom:20px;
+bottom:80px;
 left:50%;
 transform:translateX(-50%);
 background:#111;
@@ -85,18 +93,34 @@ border-radius:15px;
 background:#ff4b2b;
 color:white;
 }
+
+.sticky-bar{
+position:fixed;
+bottom:0;
+width:100%;
+background:linear-gradient(45deg,#ff416c,#ff4b2b);
+text-align:center;
+padding:10px;
+}
+
+.sticky-bar a{
+color:white;
+font-weight:bold;
+text-decoration:none;
+}
 </style>
 </head>
 <body>
 
 <header>🔥 PrimeX Official Offers</header>
 
-<div class="buttons">
+<div class="top-buttons">
 <a href="https://t.me/Primex_Shop07_Bot">📞 Contact</a>
 <a href="https://t.me/+iu2fM-K0fVczMTE9">📢 Channel</a>
 <a href="https://t.me/PRIME_X_CHAT2">💬 Chat</a>
 </div>
 
+<div id="featuredSection"></div>
 <div id="offersContainer"></div>
 
 <div class="popup" id="popup">
@@ -106,32 +130,49 @@ color:white;
 <button onclick="closePopup()">Close</button>
 </div>
 
+<div class="sticky-bar">
+<a href="https://t.me/+iu2fM-K0fVczMTE9">🔥 Join Telegram Channel Now</a>
+</div>
+
 <script>
 let offers = JSON.parse(localStorage.getItem("primex_offers")) || [];
 
 function renderOffers(){
-const container = document.getElementById("offersContainer");
+let container=document.getElementById("offersContainer");
+let featured=document.getElementById("featuredSection");
 container.innerHTML="";
+featured.innerHTML="";
 
-if(offers.length===0){
-container.innerHTML="<h3 style='text-align:center;'>No Offers Available</h3>";
-return;
-}
+offers.forEach((offer,index)=>{
+if(!offer.active) return;
 
-offers.forEach(offer=>{
-const card=document.createElement("div");
-card.className="offer-card";
+if(offer.expiry && new Date() > new Date(offer.expiry)) return;
 
-card.innerHTML=`
+let stars="⭐".repeat(offer.rating || 0);
+
+let cardHTML=`
+<div class="${offer.featured?'featured':'offer-card'}">
 <h3>${offer.title}</h3>
 <p>${offer.description}</p>
-${offer.image ? `<img src="${offer.image}">` : ""}
-${offer.video ? `<video src="${offer.video}" controls></video>` : ""}
-<a href="${offer.link}" target="_blank" class="join-btn">🔥 Get Offer</a>
+<div>${stars}</div>
+${offer.image?`<img src="${offer.image}">`:""}
+${offer.video?`<video src="${offer.video}" controls></video>`:""}
+<p>👁 ${offer.clicks || 0} clicks</p>
+<a href="${offer.link}" target="_blank" onclick="countClick(${index})" class="join-btn">🔥 Get Offer</a>
+</div>
 `;
 
-container.appendChild(card);
+if(offer.featured){
+featured.innerHTML+=cardHTML;
+}else{
+container.innerHTML+=cardHTML;
+}
 });
+}
+
+function countClick(index){
+offers[index].clicks=(offers[index].clicks||0)+1;
+localStorage.setItem("primex_offers",JSON.stringify(offers));
 }
 
 function closePopup(){
