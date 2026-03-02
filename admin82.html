@@ -2,66 +2,75 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PrimeX Admin</title>
+<title>PrimeX Admin Panel</title>
 
 <style>
 
 body{
-font-family:Arial;
+font-family:'Segoe UI';
 background:#0f172a;
 color:white;
 padding:20px;
 }
 
-input,textarea{
+h2{
+text-align:center;
+background:linear-gradient(45deg,#ff512f,#dd2476);
+padding:10px;
+border-radius:10px;
+}
+
+input,textarea,select{
 width:100%;
-padding:8px;
-margin:5px 0;
-border-radius:6px;
+padding:10px;
+margin:8px 0;
+border-radius:8px;
 border:none;
 }
 
 button{
 padding:10px;
-width:100%;
-margin-top:5px;
 border:none;
 border-radius:20px;
 background:#ff512f;
 color:white;
 font-weight:bold;
 cursor:pointer;
+margin-top:5px;
 }
 
 .box{
 background:#1e293b;
-padding:10px;
-margin-top:10px;
+padding:12px;
 border-radius:10px;
+margin-top:10px;
 }
+
+#panel{display:none;}
 
 </style>
 </head>
 <body>
 
-<h2>🔐 Admin Login</h2>
+<h2>🔐 PrimeX Admin</h2>
 
-<input type="password" id="pass">
+<input type="password" id="pass" placeholder="Enter Password">
 <button onclick="login()">Login</button>
 
-<div id="panel" style="display:none">
-
-<hr>
+<div id="panel">
 
 <h3>Add Offer</h3>
 
 <input id="title" placeholder="Offer Title">
-
-<textarea id="desc" placeholder="Offer Description"></textarea>
-
+<textarea id="desc" placeholder="Description"></textarea>
 <input id="link" placeholder="Offer Link">
 
-<input id="image" placeholder="Image URL">
+<select id="mediaType">
+<option value="image">Image</option>
+<option value="video">Video</option>
+</select>
+
+<input type="file" id="mediaInput" accept="image/*,video/*">
 
 <button onclick="add()">Publish Offer</button>
 
@@ -70,15 +79,12 @@ border-radius:10px;
 <h3>Change Password</h3>
 
 <input id="oldpass" placeholder="Old Password">
-
 <input id="newpass" placeholder="New Password">
-
 <button onclick="changePass()">Update Password</button>
 
 <hr>
 
 <h3>Manage Offers</h3>
-
 <div id="list"></div>
 
 </div>
@@ -86,137 +92,79 @@ border-radius:10px;
 <script>
 
 let password = localStorage.getItem("admin_pass") || "1234";
-
 let offers = JSON.parse(localStorage.getItem("offers")) || [];
 
 function login(){
-
-if(document.getElementById("pass").value===password){
-
-document.getElementById("panel").style.display="block";
-
+if(pass.value===password){
+panel.style.display="block";
 render();
-
 }else{
-
-alert("Wrong password");
-
+alert("Wrong Password");
 }
-
 }
 
 function changePass(){
-
-let old=document.getElementById("oldpass").value;
-
-let newp=document.getElementById("newpass").value;
-
-if(old===password){
-
-localStorage.setItem("admin_pass",newp);
-
-password=newp;
-
+if(oldpass.value===password){
+localStorage.setItem("admin_pass",newpass.value);
+password=newpass.value;
 alert("Password Updated");
-
 }else{
-
-alert("Wrong old password");
-
+alert("Wrong Old Password");
 }
-
 }
 
 function add(){
 
+let file = mediaInput.files[0];
+if(!file) return alert("Select media");
+
+let reader = new FileReader();
+
+reader.onload=function(e){
+
 let o={
-
 title:title.value,
-
 desc:desc.value,
-
 link:link.value,
-
-image:image.value,
-
+media:e.target.result,
+mediaType:mediaType.value,
 active:true
-
 };
 
 offers.push(o);
-
 localStorage.setItem("offers",JSON.stringify(offers));
-
 alert("Offer Added");
-
 location.reload();
+};
 
+reader.readAsDataURL(file);
 }
 
 function render(){
 
-let list=document.getElementById("list");
-
 list.innerHTML="";
 
 offers.forEach((o,i)=>{
-
 list.innerHTML+=`
-
 <div class="box">
-
 <b>${o.title}</b><br>
-
-<button onclick="edit(${i})">Edit</button>
-
 <button onclick="toggle(${i})">${o.active?'Deactivate':'Activate'}</button>
-
 <button onclick="del(${i})">Delete</button>
-
 </div>
-
 `;
-
 });
-
-}
-
-function edit(i){
-
-let t=prompt("Title",offers[i].title);
-
-let d=prompt("Description",offers[i].desc);
-
-let l=prompt("Link",offers[i].link);
-
-let img=prompt("Image URL",offers[i].image);
-
-offers[i]={title:t,desc:d,link:l,image:img,active:true};
-
-localStorage.setItem("offers",JSON.stringify(offers));
-
-render();
-
 }
 
 function toggle(i){
-
 offers[i].active=!offers[i].active;
-
 localStorage.setItem("offers",JSON.stringify(offers));
-
 render();
-
 }
 
 function del(i){
-
 offers.splice(i,1);
-
 localStorage.setItem("offers",JSON.stringify(offers));
-
 render();
-
 }
 
 </script>
