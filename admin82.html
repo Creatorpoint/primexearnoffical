@@ -2,53 +2,182 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PrimeX Admin</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrimeX Admin Panel</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+}
+
+.container{
+max-width:500px;
+margin:30px auto;
+background:rgba(255,255,255,0.08);
+padding:20px;
+border-radius:20px;
+backdrop-filter:blur(15px);
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:6px 0;
+border:none;
+border-radius:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border:none;
+border-radius:20px;
+background:linear-gradient(45deg,#ff416c,#ff4b2b);
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.offer-box{
+background:rgba(0,0,0,0.3);
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+}
+.hidden{display:none;}
+</style>
 </head>
 <body>
 
-<div class="admin-login" id="loginBox">
+<div class="container" id="loginBox">
 <h2>🔐 Admin Login</h2>
 <input type="password" id="loginPass" placeholder="Enter Password">
 <button onclick="login()">Login</button>
 </div>
 
-<div class="admin-panel" id="adminPanel" style="display:none;">
-<h2>📌 Upload New Offer</h2>
+<div class="container hidden" id="adminPanel">
 
+<h2>📌 Upload Offer</h2>
 <input type="text" id="title" placeholder="Offer Title">
-<textarea id="desc" placeholder="Offer Description"></textarea>
-
-<label>Upload Image</label>
-<input type="file" id="imageFile" accept="image/*">
-
-<label>Upload Video</label>
-<input type="file" id="videoFile" accept="video/*">
-
+<textarea id="description" placeholder="Offer Description"></textarea>
 <input type="text" id="link" placeholder="Offer Link">
-
-<label>Expiry Date</label>
 <input type="date" id="expiry">
-
-<label>Rating (1-5)</label>
-<input type="number" id="rating" min="1" max="5">
-
-<label><input type="checkbox" id="featured"> Featured Offer</label>
+<input type="number" id="rating" placeholder="Rating (1-5)">
+<label><input type="checkbox" id="featured"> Featured</label>
+<input type="file" id="image" accept="image/*">
+<input type="file" id="video" accept="video/*">
 
 <button onclick="addOffer()">Publish Offer</button>
 
 <hr>
+
 <h3>🔑 Change Password</h3>
 <input type="password" id="currentPass" placeholder="Current Password">
 <input type="password" id="newPass" placeholder="New Password">
 <button onclick="changePassword()">Update Password</button>
 
 <hr>
-<h3>📊 Existing Offers</h3>
-<div id="adminOffers"></div>
+
+<h3>📊 Manage Offers</h3>
+<div id="offerList"></div>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+let savedPassword = localStorage.getItem("admin_password") || "1234";
+let offers = JSON.parse(localStorage.getItem("primex_offers")) || [];
+
+function login(){
+let pass=document.getElementById("loginPass").value;
+if(pass===savedPassword){
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("adminPanel").classList.remove("hidden");
+renderOffers();
+}else alert("Wrong Password");
+}
+
+function changePassword(){
+let current=document.getElementById("currentPass").value;
+let newPass=document.getElementById("newPass").value;
+if(current===savedPassword){
+localStorage.setItem("admin_password",newPass);
+savedPassword=newPass;
+alert("Password Updated");
+}else alert("Wrong Current Password");
+}
+
+function addOffer(){
+let newOffer={
+title:title.value,
+description:description.value,
+link:link.value,
+expiry:expiry.value,
+rating:rating.value,
+featured:featured.checked,
+active:true,
+clicks:0
+};
+
+let imageFile=document.getElementById("image").files[0];
+let videoFile=document.getElementById("video").files[0];
+let reader=new FileReader();
+
+if(imageFile){
+reader.onload=e=>{newOffer.image=e.target.result;save(newOffer);}
+reader.readAsDataURL(imageFile);
+}else if(videoFile){
+reader.onload=e=>{newOffer.video=e.target.result;save(newOffer);}
+reader.readAsDataURL(videoFile);
+}else save(newOffer);
+}
+
+function save(offer){
+offers.push(offer);
+localStorage.setItem("primex_offers",JSON.stringify(offers));
+alert("Offer Added");
+location.reload();
+}
+
+function renderOffers(){
+let container=document.getElementById("offerList");
+container.innerHTML="";
+offers.forEach((o,i)=>{
+container.innerHTML+=`
+<div class="offer-box">
+<b>${o.title}</b><br>
+Status: ${o.active?'Active':'Inactive'}<br>
+Clicks: ${o.clicks || 0}<br>
+<button onclick="toggle(${i})">${o.active?'Deactivate':'Activate'}</button>
+<button onclick="edit(${i})">Edit</button>
+<button onclick="removeOffer(${i})">Delete</button>
+</div>
+`;
+});
+}
+
+function toggle(i){
+offers[i].active=!offers[i].active;
+localStorage.setItem("primex_offers",JSON.stringify(offers));
+renderOffers();
+}
+
+function edit(i){
+let newTitle=prompt("New Title:",offers[i].title);
+if(newTitle) offers[i].title=newTitle;
+localStorage.setItem("primex_offers",JSON.stringify(offers));
+renderOffers();
+}
+
+function removeOffer(i){
+offers.splice(i,1);
+localStorage.setItem("primex_offers",JSON.stringify(offers));
+renderOffers();
+}
+</script>
+
 </body>
 </html>
