@@ -2,66 +2,25 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PrimeX Admin Panel</title>
-
+<title>PrimeX Admin</title>
 <style>
-
-body{
-font-family:'Segoe UI';
-background:#0f172a;
-color:white;
-padding:20px;
-}
-
-h2{
-text-align:center;
-background:linear-gradient(45deg,#ff512f,#dd2476);
-padding:10px;
-border-radius:10px;
-}
-
-input,textarea,select{
-width:100%;
-padding:10px;
-margin:8px 0;
-border-radius:8px;
-border:none;
-}
-
-button{
-padding:10px;
-border:none;
-border-radius:20px;
-background:#ff512f;
-color:white;
-font-weight:bold;
-cursor:pointer;
-margin-top:5px;
-}
-
-.box{
-background:#1e293b;
-padding:12px;
-border-radius:10px;
-margin-top:10px;
-}
-
+body{font-family:Segoe UI;background:#0f172a;color:white;padding:20px;}
+input,textarea,select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:none;}
+button{padding:8px 15px;border:none;border-radius:20px;background:#ff512f;color:white;margin-top:5px;cursor:pointer;}
+.box{background:#1e293b;padding:10px;border-radius:10px;margin-top:10px;}
 #panel{display:none;}
-
 </style>
 </head>
 <body>
 
-<h2>🔐 PrimeX Admin</h2>
-
-<input type="password" id="pass" placeholder="Enter Password">
+<h2>Admin Login</h2>
+<input type="password" id="pass" placeholder="Password">
 <button onclick="login()">Login</button>
 
 <div id="panel">
 
 <h3>Add Offer</h3>
-
-<input id="title" placeholder="Offer Title">
+<input id="title" placeholder="Title">
 <textarea id="desc" placeholder="Description"></textarea>
 <input id="link" placeholder="Offer Link">
 
@@ -71,16 +30,7 @@ margin-top:10px;
 </select>
 
 <input type="file" id="mediaInput" accept="image/*,video/*">
-
-<button onclick="add()">Publish Offer</button>
-
-<hr>
-
-<h3>Change Password</h3>
-
-<input id="oldpass" placeholder="Old Password">
-<input id="newpass" placeholder="New Password">
-<button onclick="changePass()">Update Password</button>
+<button onclick="add()">Publish</button>
 
 <hr>
 
@@ -103,25 +53,16 @@ alert("Wrong Password");
 }
 }
 
-function changePass(){
-if(oldpass.value===password){
-localStorage.setItem("admin_pass",newpass.value);
-password=newpass.value;
-alert("Password Updated");
-}else{
-alert("Wrong Old Password");
-}
-}
-
 function add(){
-
 let file = mediaInput.files[0];
-if(!file) return alert("Select media");
+if(!file) return alert("Select file");
+
+if(file.size > 5 * 1024 * 1024){
+return alert("File too large (Max 5MB)");
+}
 
 let reader = new FileReader();
-
-reader.onload=function(e){
-
+reader.onload = function(e){
 let o={
 title:title.value,
 desc:desc.value,
@@ -130,20 +71,16 @@ media:e.target.result,
 mediaType:mediaType.value,
 active:true
 };
-
 offers.push(o);
 localStorage.setItem("offers",JSON.stringify(offers));
 alert("Offer Added");
 location.reload();
 };
-
 reader.readAsDataURL(file);
 }
 
 function render(){
-
 list.innerHTML="";
-
 offers.forEach((o,i)=>{
 list.innerHTML+=`
 <div class="box">
