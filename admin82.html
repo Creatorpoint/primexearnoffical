@@ -7,7 +7,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, update, remove, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyCJIU56dxgxS2cIh99zSvp_FAn9hrSSl0g",
@@ -22,24 +22,25 @@ appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const ADMIN_PASSWORD = "prime123";
+const ADMIN_PASSWORD = "primeearn123";
 
 window.login = function(){
-let p=document.getElementById("pass").value;
-if(p===ADMIN_PASSWORD){
-document.getElementById("loginBox").style.display="none";
-document.getElementById("panel").style.display="block";
+if(document.getElementById("pass").value === ADMIN_PASSWORD){
+loginBox.style.display="none";
+panel.style.display="block";
 }else{
 alert("Wrong Password");
 }
 }
 
-window.addOffer=function(){
-let title=title.value.trim();
-let details=details.value.trim();
-let image=image.value.trim();
-let video=video.value.trim();
-let link=link.value.trim();
+window.publishOffer = function(){
+let title=titleInp.value.trim();
+let details=detailsInp.value.trim();
+let image=imageInp.value.trim();
+let video=videoInp.value.trim();
+let link=linkInp.value.trim();
+let userProfit=userProfitInp.value.trim();
+let adminProfit=adminProfitInp.value.trim();
 
 if(!title || !link){
 alert("Title & Link required");
@@ -48,31 +49,19 @@ return;
 
 push(ref(db,"offers"),{
 title,details,image,video,link,
+userProfit,adminProfit,
 status:"active",
 time:Date.now()
 });
 
-alert("Offer Published");
-title.value="";details.value="";image.value="";video.value="";link.value="";
-}
-
-window.sendBroadcast=function(){
-let msg=bmsg.value.trim();
-let link=blink.value.trim();
-
-if(!msg){
-alert("Enter message");
-return;
-}
-
-set(ref(db,"broadcast"),{
-message:msg,
-link:link,
-active:true,
-time:Date.now()
-});
-
-alert("Broadcast Sent");
+alert("Loot Published Successfully");
+titleInp.value="";
+detailsInp.value="";
+imageInp.value="";
+videoInp.value="";
+linkInp.value="";
+userProfitInp.value="";
+adminProfitInp.value="";
 }
 
 window.toggleStatus=function(id,status){
@@ -86,16 +75,16 @@ remove(ref(db,"offers/"+id));
 }
 
 onValue(ref(db,"offers"),snap=>{
-let list=document.getElementById("offerList");
-list.innerHTML="";
+offerList.innerHTML="";
 snap.forEach(child=>{
 let d=child.val();
 let id=child.key;
 
-list.innerHTML+=`
+offerList.innerHTML+=`
 <div class="card">
 <h3>${d.title}</h3>
-<p>${d.details||""}</p>
+<p>User Profit: ₹${d.userProfit || 0}</p>
+<p>Your Profit: ₹${d.adminProfit || 0}</p>
 <p>Status: ${d.status}</p>
 <button onclick="toggleStatus('${id}','${d.status}')">Toggle</button>
 <button onclick="deleteOffer('${id}')">Delete</button>
@@ -117,7 +106,7 @@ background:#1a1a1a;
 padding:15px;
 margin:10px 0;
 border-radius:12px;
-box-shadow:0 0 20px #00f2ff44;
+box-shadow:0 0 25px #00f2ff;
 }
 </style>
 </head>
@@ -132,20 +121,17 @@ box-shadow:0 0 20px #00f2ff44;
 
 <div id="panel" style="display:none">
 
-<h3>Publish Offer</h3>
-<input id="title" placeholder="Offer Title">
-<textarea id="details" placeholder="Offer Details"></textarea>
-<input id="image" placeholder="Image URL">
-<input id="video" placeholder="Video URL (mp4 link)">
-<input id="link" placeholder="Offer Redirect Link">
-<button onclick="addOffer()">Publish Offer</button>
+<h3>Publish Loot / Earning Offer</h3>
+<input id="titleInp" placeholder="Offer Title">
+<textarea id="detailsInp" placeholder="Offer Details"></textarea>
+<input id="imageInp" placeholder="Image URL">
+<input id="videoInp" placeholder="Video URL (optional)">
+<input id="linkInp" placeholder="Offer Link">
+<input id="userProfitInp" placeholder="User Profit (₹)">
+<input id="adminProfitInp" placeholder="Your Profit (₹)">
+<button onclick="publishOffer()">Publish Offer</button>
 
-<h3>Broadcast</h3>
-<input id="bmsg" placeholder="Broadcast Message">
-<input id="blink" placeholder="Broadcast Link (optional)">
-<button onclick="sendBroadcast()">Send Broadcast</button>
-
-<h3>All Offers</h3>
+<h3>All Published Offers</h3>
 <div id="offerList"></div>
 
 </div>
