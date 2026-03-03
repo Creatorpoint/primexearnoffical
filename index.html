@@ -19,20 +19,20 @@ messagingSenderId: "533446392320",
 appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
 onValue(ref(db,"offers"),snap=>{
-let list=document.getElementById("offers");
-list.innerHTML="";
+offers.innerHTML="";
 snap.forEach(child=>{
-let data=child.val();
-if(data.status=="active"){
-list.innerHTML+=`
+let d=child.val();
+if(d.status=="active"){
+offers.innerHTML+=`
 <div class="card">
-<img src="${data.image}" width="100%">
-<h3>${data.title}</h3>
-<a href="${data.link}" target="_blank">
+<img src="${d.image}" width="100%">
+<h2>${d.title}</h2>
+<p>${d.details}</p>
+<a href="${d.link}" target="_blank">
 <button>Grab Offer</button>
 </a>
 </div>
@@ -41,53 +41,68 @@ list.innerHTML+=`
 });
 });
 
-onValue(ref(db,"settings/channel"),snap=>{
+onValue(ref(db,"broadcast"),snap=>{
 if(snap.exists()){
-let link=snap.val().link;
-document.getElementById("joinBtn").onclick=function(){
-window.open(link,"_blank");
+let b=snap.val();
+if(b.active){
+popup.innerHTML=`<h3>${b.title}</h3><p>${b.message}</p><button onclick="closePop()">Close</button>`;
+popup.style.display="block";
 }
 }
 });
 
-onValue(ref(db,"broadcast/message"),snap=>{
-if(snap.exists()){
-let msg=snap.val().text;
-document.getElementById("broadcastBox").innerText=msg;
-document.getElementById("broadcastBox").style.display="block";
+window.closePop=function(){
+popup.style.display="none";
 }
-});
 </script>
 
 <style>
-body{background:#111;color:white;font-family:Arial;padding:15px}
-.card{background:#1a1a1a;padding:10px;margin:10px 0;border-radius:10px}
-button{background:#00f2ff;color:black;padding:10px;border:none;border-radius:6px}
-#popup{
-position:fixed;
-bottom:20px;
-right:20px;
+body{background:#111;color:white;font-family:Arial;margin:0;padding:15px}
+header{text-align:center;margin-bottom:20px}
+header img{
+width:90px;height:90px;border-radius:50%;
+box-shadow:0 0 25px #00f2ff;
+}
+.card{
+background:#1a1a1a;
+padding:15px;
+margin:15px 0;
+border-radius:12px;
+box-shadow:0 0 15px #00f2ff33;
+}
+button{
 background:#00f2ff;
 color:black;
 padding:10px;
+border:none;
 border-radius:8px;
+font-weight:bold;
 }
-#broadcastBox{
-background:red;
-padding:10px;
+#popup{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#000;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 30px #00f2ff;
 display:none;
-margin-bottom:10px;
+width:80%;
 }
 </style>
 </head>
 
 <body>
 
-<div id="broadcastBox"></div>
-
-<button id="joinBtn">Join Channel</button>
+<header>
+<img src="https://files.catbox.moe/zwol8e.jpg">
+<h1>Prime Earn Offers</h1>
+</header>
 
 <div id="offers"></div>
+
+<div id="popup"></div>
 
 </body>
 </html>
