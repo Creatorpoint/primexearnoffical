@@ -5,136 +5,9 @@
 <title>Prime Earn Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Firebase CDN -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#0f0f0f;
-color:#fff;
-}
-
-header{
-background:#111;
-padding:15px;
-text-align:center;
-box-shadow:0 0 15px #00f2ff;
-}
-
-header img{
-width:60px;
-height:60px;
-border-radius:50%;
-box-shadow:0 0 20px #00f2ff;
-}
-
-.container{
-padding:20px;
-}
-
-input, button{
-width:100%;
-padding:10px;
-margin:8px 0;
-border:none;
-border-radius:8px;
-}
-
-input{
-background:#1f1f1f;
-color:#fff;
-}
-
-button{
-background:#00f2ff;
-color:#000;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{
-background:#00c4cc;
-}
-
-.offer-card{
-background:#1a1a1a;
-padding:15px;
-margin-top:15px;
-border-radius:10px;
-box-shadow:0 0 10px #00f2ff33;
-}
-
-.status{
-font-size:12px;
-padding:4px 8px;
-border-radius:6px;
-display:inline-block;
-}
-
-.active{
-background:green;
-}
-
-.inactive{
-background:red;
-}
-
-.hidden{
-display:none;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<img src="https://files.catbox.moe/zwol8e.jpg">
-<h2>Prime Earn Admin Panel</h2>
-</header>
-
-<div class="container">
-
-<!-- LOGIN -->
-<div id="loginBox">
-<h3>Admin Login</h3>
-<input type="password" id="adminPass" placeholder="Enter Admin Password">
-<button onclick="login()">Login</button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
-
-<h3>Add New Offer</h3>
-
-<input type="text" id="title" placeholder="Offer Title">
-<input type="text" id="image" placeholder="Image URL">
-<input type="text" id="video" placeholder="Video URL (optional)">
-<input type="text" id="link" placeholder="Offer Link">
-
-<button onclick="addOffer()">Add Offer</button>
-
-<hr>
-
-<h3>Change Password</h3>
-<input type="password" id="newPass" placeholder="New Password">
-<button onclick="changePassword()">Update Password</button>
-
-<hr>
-
-<h3>All Offers</h3>
-<div id="offerList"></div>
-
-</div>
-
-</div>
-
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, update, remove, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyCJIU56dxgxS2cIh99zSvp_FAn9hrSSl0g",
@@ -149,48 +22,31 @@ appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Default password
 let ADMIN_PASSWORD = "12345";
 
-// Login
 window.login = function(){
-let pass = document.getElementById("adminPass").value;
+let pass = document.getElementById("pass").value;
 if(pass === ADMIN_PASSWORD){
-document.getElementById("loginBox").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-}
-else{
+document.getElementById("login").style.display="none";
+document.getElementById("panel").style.display="block";
+}else{
 alert("Wrong Password");
 }
 }
 
-// Change Password
-window.changePassword = function(){
-let newPass = document.getElementById("newPass").value;
-if(newPass.length < 4){
-alert("Password too short");
-return;
-}
-ADMIN_PASSWORD = newPass;
-alert("Password Updated");
-}
-
-// Add Offer
 window.addOffer = function(){
 let title = document.getElementById("title").value;
-let image = document.getElementById("image").value;
-let video = document.getElementById("video").value;
+let img = document.getElementById("image").value;
 let link = document.getElementById("link").value;
 
 if(title=="" || link==""){
-alert("Fill required fields");
+alert("Required fields missing");
 return;
 }
 
 push(ref(db,"offers"),{
 title:title,
-image:image,
-video:video,
+image:img,
 link:link,
 status:"active"
 });
@@ -198,41 +54,88 @@ status:"active"
 alert("Offer Added");
 }
 
-// Load Offers
-const offerList = document.getElementById("offerList");
+window.broadcast = function(){
+let msg = document.getElementById("broadcast").value;
+set(ref(db,"broadcast/message"),{
+text:msg,
+time:Date.now()
+});
+alert("Broadcast Sent");
+}
 
-onValue(ref(db,"offers"),(snapshot)=>{
-offerList.innerHTML="";
-snapshot.forEach((child)=>{
-let data = child.val();
-let key = child.key;
+window.updateChannel = function(){
+let ch = document.getElementById("channel").value;
+set(ref(db,"settings/channel"),{
+link:ch
+});
+alert("Channel Updated");
+}
 
-offerList.innerHTML += `
-<div class="offer-card">
+window.toggleStatus = function(id,status){
+update(ref(db,"offers/"+id),{
+status: status=="active"?"inactive":"active"
+});
+}
+
+window.deleteOffer = function(id){
+remove(ref(db,"offers/"+id));
+}
+
+onValue(ref(db,"offers"),snap=>{
+let list = document.getElementById("offerList");
+list.innerHTML="";
+snap.forEach(child=>{
+let data=child.val();
+let id=child.key;
+
+list.innerHTML+=`
+<div class="card">
 <h4>${data.title}</h4>
-<span class="status ${data.status=='active'?'active':'inactive'}">${data.status}</span>
-<br><br>
-<button onclick="toggleStatus('${key}','${data.status}')">Toggle Active</button>
-<button onclick="deleteOffer('${key}')">Delete</button>
+<p>Status: ${data.status}</p>
+<button onclick="toggleStatus('${id}','${data.status}')">Toggle</button>
+<button onclick="deleteOffer('${id}')">Delete</button>
 </div>
 `;
 });
 });
-
-// Toggle Active
-window.toggleStatus = function(key,status){
-let newStatus = status=="active"?"inactive":"active";
-update(ref(db,"offers/"+key),{
-status:newStatus
-});
-}
-
-// Delete Offer
-window.deleteOffer = function(key){
-remove(ref(db,"offers/"+key));
-}
-
 </script>
+
+<style>
+body{background:#0f0f0f;color:white;font-family:Arial;padding:20px}
+input,button{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
+button{background:#00f2ff;color:black;font-weight:bold}
+.card{background:#1a1a1a;padding:10px;margin:10px 0;border-radius:8px}
+</style>
+</head>
+
+<body>
+
+<div id="login">
+<h2>Admin Login</h2>
+<input type="password" id="pass" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+
+<div id="panel" style="display:none">
+
+<h3>Add Offer</h3>
+<input id="title" placeholder="Offer Title">
+<input id="image" placeholder="Image URL">
+<input id="link" placeholder="Offer Link">
+<button onclick="addOffer()">Add Offer</button>
+
+<h3>Channel Link Update</h3>
+<input id="channel" placeholder="Telegram Channel Link">
+<button onclick="updateChannel()">Update Channel</button>
+
+<h3>Broadcast Message</h3>
+<input id="broadcast" placeholder="Enter Announcement">
+<button onclick="broadcast()">Send Broadcast</button>
+
+<h3>Offers List</h3>
+<div id="offerList"></div>
+
+</div>
 
 </body>
 </html>
