@@ -23,73 +23,68 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 onValue(ref(db,"offers"),snap=>{
-let offers=document.getElementById("offers");
 offers.innerHTML="";
 snap.forEach(child=>{
 let d=child.val();
 if(d.status==="active"){
 offers.innerHTML+=`
 <div class="card">
+<img src="https://files.catbox.moe/zwol8e.jpg" class="logo">
 ${d.image?`<img src="${d.image}" width="100%">`:""}
 ${d.video?`<video src="${d.video}" controls width="100%"></video>`:""}
 <h2>${d.title}</h2>
 <p>${d.details||""}</p>
-<button onclick="openLink('${d.link}')">Grab Offer</button>
+
+<div class="profit">
+<span>User Earn: ₹${d.userProfit||0}</span>
+<span>Your Profit: ₹${d.adminProfit||0}</span>
+</div>
+
+<button onclick="window.open('${d.link}','_blank')">Grab Loot</button>
 </div>
 `;
 }
 });
 });
-
-window.openLink=function(url){
-window.location.href=url;
-}
-
-onValue(ref(db,"broadcast"),snap=>{
-if(snap.exists()){
-let d=snap.val();
-if(d.active){
-let box=document.getElementById("popup");
-box.innerHTML=`
-<p>${d.message}</p>
-${d.link?`<a href="${d.link}" target="_blank"><button>Open Link</button></a>`:""}
-<button onclick="closePop()">Close</button>
-`;
-box.style.display="block";
-}
-}
-});
-
-window.closePop=function(){
-document.getElementById("popup").style.display="none";
-}
 </script>
 
 <style>
 body{background:#111;color:white;font-family:Arial;margin:0;padding:15px}
-.header{text-align:center;margin-bottom:20px}
-.buttons{
-display:flex;
-gap:10px;
-justify-content:center;
-flex-wrap:wrap;
-margin-bottom:20px;
-}
-.buttons a button{
-background:#00f2ff;
-color:black;
-border:none;
-padding:10px 15px;
-border-radius:8px;
-font-weight:bold;
-}
+
 .card{
 background:#1a1a1a;
 padding:15px;
-margin:15px 0;
-border-radius:12px;
-box-shadow:0 0 20px #00f2ff33;
+margin:20px 0;
+border-radius:15px;
+box-shadow:
+0 0 10px #00f2ff,
+0 0 20px #00f2ff,
+0 0 30px #00f2ff;
+animation: glow 2s infinite alternate;
 }
+
+@keyframes glow{
+from{box-shadow:0 0 10px #00f2ff;}
+to{box-shadow:0 0 35px #00f2ff;}
+}
+
+.logo{
+width:60px;
+height:60px;
+border-radius:50%;
+display:block;
+margin:auto;
+box-shadow:0 0 20px #00f2ff;
+}
+
+.profit{
+display:flex;
+justify-content:space-between;
+margin:10px 0;
+font-weight:bold;
+color:#00f2ff;
+}
+
 button{
 background:#00f2ff;
 color:black;
@@ -97,37 +92,16 @@ padding:10px;
 border:none;
 border-radius:8px;
 font-weight:bold;
-}
-#popup{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-background:#000;
-padding:15px;
-border-radius:12px;
-box-shadow:0 0 25px #00f2ff;
-display:none;
-width:85%;
-text-align:center;
+width:100%;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-<h1>Prime Earn</h1>
-</div>
-
-<div class="buttons">
-<a href="https://t.me/+rvPlEQ-0AhlmZjY1" target="_blank"><button>Join Channel</button></a>
-<a href="https://t.me/Primex_Shop07_Bot" target="_blank"><button>Support</button></a>
-<a href="https://t.me/PRIME_X_CHAT2" target="_blank"><button>Join Group</button></a>
-</div>
+<h1 style="text-align:center;">🔥 Prime Earn Loot Offers 🔥</h1>
 
 <div id="offers"></div>
-<div id="popup"></div>
 
 </body>
 </html>
