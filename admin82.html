@@ -22,44 +22,50 @@ appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let ADMIN_PASSWORD = "12345";
+window.addOffer = function(){
+let title=document.getElementById("title").value.trim();
+let details=document.getElementById("details").value.trim();
+let image=document.getElementById("image").value.trim();
+let link=document.getElementById("link").value.trim();
 
-window.login = function(){
-let pass=document.getElementById("pass").value;
-if(pass===ADMIN_PASSWORD){
-document.getElementById("loginBox").style.display="none";
-document.getElementById("panel").style.display="block";
-}else alert("Wrong Password");
+if(!title || !link){
+alert("Title & Link required");
+return;
 }
-
-window.addOffer=function(){
-let title=titleInp.value;
-let details=detailsInp.value;
-let img=imageInp.value;
-let link=linkInp.value;
 
 push(ref(db,"offers"),{
 title:title,
 details:details,
-image:img,
+image:image,
 link:link,
-status:"active"
+status:"active",
+time:Date.now()
 });
-alert("Offer Added");
+
+alert("Offer Added Successfully");
+document.getElementById("title").value="";
+document.getElementById("details").value="";
+document.getElementById("image").value="";
+document.getElementById("link").value="";
 }
 
-window.editOffer=function(id){
-let newTitle=prompt("New Title:");
-let newDetails=prompt("New Details:");
-update(ref(db,"offers/"+id),{
-title:newTitle,
-details:newDetails
+window.sendBroadcast=function(){
+let msg=document.getElementById("broadcast").value.trim();
+if(!msg){
+alert("Enter message");
+return;
+}
+set(ref(db,"broadcast"),{
+message:msg,
+active:true,
+time:Date.now()
 });
+alert("Broadcast Sent");
 }
 
 window.toggleStatus=function(id,status){
 update(ref(db,"offers/"+id),{
-status: status=="active"?"inactive":"active"
+status: status==="active"?"inactive":"active"
 });
 }
 
@@ -67,32 +73,18 @@ window.deleteOffer=function(id){
 remove(ref(db,"offers/"+id));
 }
 
-window.sendBroadcast=function(){
-let btitle=bTitle.value;
-let bmsg=bMsg.value;
-let active=bActive.checked;
-
-set(ref(db,"broadcast"),{
-title:btitle,
-message:bmsg,
-active:active
-});
-alert("Broadcast Updated");
-}
-
 onValue(ref(db,"offers"),snap=>{
-offerList.innerHTML="";
+let list=document.getElementById("offerList");
+list.innerHTML="";
 snap.forEach(child=>{
 let d=child.val();
 let id=child.key;
-
-offerList.innerHTML+=`
+list.innerHTML+=`
 <div class="card">
 <h3>${d.title}</h3>
-<p>${d.details}</p>
+<p>${d.details||""}</p>
 <p>Status: ${d.status}</p>
 <button onclick="toggleStatus('${id}','${d.status}')">Toggle</button>
-<button onclick="editOffer('${id}')">Edit</button>
 <button onclick="deleteOffer('${id}')">Delete</button>
 </div>
 `;
@@ -101,26 +93,9 @@ offerList.innerHTML+=`
 </script>
 
 <style>
-body{background:#0f0f0f;color:white;font-family:Arial;margin:0}
-header{
-background:#111;
-text-align:center;
-padding:15px;
-box-shadow:0 0 20px #00f2ff;
-}
-header img{
-width:80px;
-height:80px;
-border-radius:50%;
-box-shadow:0 0 25px #00f2ff;
-}
-.container{padding:20px}
+body{background:#0f0f0f;color:white;font-family:Arial;padding:20px}
 input,textarea,button{
-width:100%;
-padding:10px;
-margin:8px 0;
-border-radius:8px;
-border:none;
+width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none
 }
 input,textarea{background:#1a1a1a;color:white}
 button{background:#00f2ff;color:black;font-weight:bold}
@@ -128,47 +103,29 @@ button{background:#00f2ff;color:black;font-weight:bold}
 background:#1a1a1a;
 padding:15px;
 margin:10px 0;
-border-radius:10px;
-box-shadow:0 0 10px #00f2ff33;
+border-radius:12px;
+box-shadow:0 0 15px #00f2ff33;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<img src="https://files.catbox.moe/zwol8e.jpg">
-<h2>Prime Earn Admin</h2>
-</header>
-
-<div class="container">
-
-<div id="loginBox">
-<h3>Admin Login</h3>
-<input type="password" id="pass" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
-
-<div id="panel" style="display:none">
+<h2>Admin Panel</h2>
 
 <h3>Add Offer</h3>
-<input id="titleInp" placeholder="Offer Title">
-<textarea id="detailsInp" placeholder="Offer Details"></textarea>
-<input id="imageInp" placeholder="Image URL">
-<input id="linkInp" placeholder="Offer Link">
+<input id="title" placeholder="Offer Title">
+<textarea id="details" placeholder="Offer Details"></textarea>
+<input id="image" placeholder="Image URL">
+<input id="link" placeholder="Offer Link">
 <button onclick="addOffer()">Add Offer</button>
 
-<h3>Broadcast System</h3>
-<input id="bTitle" placeholder="Broadcast Title">
-<textarea id="bMsg" placeholder="Broadcast Message"></textarea>
-<label><input type="checkbox" id="bActive"> Activate Broadcast</label>
-<button onclick="sendBroadcast()">Update Broadcast</button>
+<h3>Broadcast</h3>
+<input id="broadcast" placeholder="Broadcast Message">
+<button onclick="sendBroadcast()">Send Broadcast</button>
 
 <h3>All Offers</h3>
 <div id="offerList"></div>
-
-</div>
-</div>
 
 </body>
 </html>
