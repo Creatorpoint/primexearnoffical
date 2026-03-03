@@ -22,11 +22,24 @@ appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-window.addOffer = function(){
-let title=document.getElementById("title").value.trim();
-let details=document.getElementById("details").value.trim();
-let image=document.getElementById("image").value.trim();
-let link=document.getElementById("link").value.trim();
+const ADMIN_PASSWORD = "prime123";
+
+window.login = function(){
+let p=document.getElementById("pass").value;
+if(p===ADMIN_PASSWORD){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("panel").style.display="block";
+}else{
+alert("Wrong Password");
+}
+}
+
+window.addOffer=function(){
+let title=title.value.trim();
+let details=details.value.trim();
+let image=image.value.trim();
+let video=video.value.trim();
+let link=link.value.trim();
 
 if(!title || !link){
 alert("Title & Link required");
@@ -34,32 +47,31 @@ return;
 }
 
 push(ref(db,"offers"),{
-title:title,
-details:details,
-image:image,
-link:link,
+title,details,image,video,link,
 status:"active",
 time:Date.now()
 });
 
-alert("Offer Added Successfully");
-document.getElementById("title").value="";
-document.getElementById("details").value="";
-document.getElementById("image").value="";
-document.getElementById("link").value="";
+alert("Offer Published");
+title.value="";details.value="";image.value="";video.value="";link.value="";
 }
 
 window.sendBroadcast=function(){
-let msg=document.getElementById("broadcast").value.trim();
+let msg=bmsg.value.trim();
+let link=blink.value.trim();
+
 if(!msg){
 alert("Enter message");
 return;
 }
+
 set(ref(db,"broadcast"),{
 message:msg,
+link:link,
 active:true,
 time:Date.now()
 });
+
 alert("Broadcast Sent");
 }
 
@@ -79,6 +91,7 @@ list.innerHTML="";
 snap.forEach(child=>{
 let d=child.val();
 let id=child.key;
+
 list.innerHTML+=`
 <div class="card">
 <h3>${d.title}</h3>
@@ -104,28 +117,38 @@ background:#1a1a1a;
 padding:15px;
 margin:10px 0;
 border-radius:12px;
-box-shadow:0 0 15px #00f2ff33;
+box-shadow:0 0 20px #00f2ff44;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Admin Panel</h2>
+<div id="loginBox">
+<h2>Admin Login</h2>
+<input type="password" id="pass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+</div>
 
-<h3>Add Offer</h3>
+<div id="panel" style="display:none">
+
+<h3>Publish Offer</h3>
 <input id="title" placeholder="Offer Title">
 <textarea id="details" placeholder="Offer Details"></textarea>
 <input id="image" placeholder="Image URL">
-<input id="link" placeholder="Offer Link">
-<button onclick="addOffer()">Add Offer</button>
+<input id="video" placeholder="Video URL (mp4 link)">
+<input id="link" placeholder="Offer Redirect Link">
+<button onclick="addOffer()">Publish Offer</button>
 
 <h3>Broadcast</h3>
-<input id="broadcast" placeholder="Broadcast Message">
+<input id="bmsg" placeholder="Broadcast Message">
+<input id="blink" placeholder="Broadcast Link (optional)">
 <button onclick="sendBroadcast()">Send Broadcast</button>
 
 <h3>All Offers</h3>
 <div id="offerList"></div>
+
+</div>
 
 </body>
 </html>
