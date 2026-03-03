@@ -2,173 +2,92 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<title>Prime Earn</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PrimeX Official</title>
-
-<style>
-body{
-margin:0;
-background:#070c18;
-font-family:Segoe UI;
-color:white;
-}
-
-header{
-text-align:center;
-padding:20px;
-font-size:26px;
-font-weight:bold;
-color:#00f2ff;
-text-shadow:0 0 15px #00f2ff;
-}
-
-.logo{
-display:block;
-margin:0 auto;
-width:120px;
-border-radius:50%;
-box-shadow:0 0 25px #00f2ff;
-}
-
-.featured{
-margin:20px;
-padding:20px;
-border:2px solid gold;
-border-radius:20px;
-box-shadow:0 0 20px gold;
-}
-
-.container{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:20px;
-padding:20px;
-}
-
-.card{
-background:#111827;
-border-radius:20px;
-border:1px solid #00f2ff;
-box-shadow:0 0 15px #00f2ff;
-overflow:hidden;
-}
-
-.card img, .card iframe{
-width:100%;
-max-height:250px;
-object-fit:cover;
-}
-
-.card-body{
-padding:15px;
-}
-
-.join{
-display:block;
-margin-top:10px;
-padding:10px;
-border-radius:25px;
-background:#00f2ff;
-color:black;
-text-align:center;
-font-weight:bold;
-text-decoration:none;
-cursor:pointer;
-}
-
-.popup{
-position:fixed;
-top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,0.8);
-display:flex;justify-content:center;align-items:center;
-visibility:hidden;
-}
-
-.popup-box{
-background:#111;
-padding:20px;
-border-radius:20px;
-box-shadow:0 0 20px #00f2ff;
-text-align:center;
-}
-</style>
-</head>
-<body>
-
-<header>⚡ PrimeX Loot & Earnings ⚡</header>
-
-<img src="https://files.catbox.moe/zwol8e.jpg" class="logo">
-
-<div id="featured"></div>
-<div class="container" id="offers"></div>
-
-<div class="popup" id="popup">
-<div class="popup-box">
-<h3>Join Our Channel 🚀</h3>
-<a href="https://t.me/+iu2fM-K0fVczMTE9" target="_blank">Join Now</a>
-<br><br>
-<button onclick="closePopup()">Close</button>
-</div>
-</div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCJIU56dxgxS2cIh99zSvp_FAn9hrSSl0g",
-  authDomain: "prime-earn-49202.firebaseapp.com",
-  projectId: "prime-earn-49202",
-  storageBucket: "prime-earn-49202.firebasestorage.app",
-  messagingSenderId: "533446392320",
-  appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
+apiKey: "AIzaSyCJIU56dxgxS2cIh99zSvp_FAn9hrSSl0g",
+authDomain: "prime-earn-49202.firebaseapp.com",
+databaseURL: "https://prime-earn-49202-default-rtdb.firebaseio.com",
+projectId: "prime-earn-49202",
+storageBucket: "prime-earn-49202.firebasestorage.app",
+messagingSenderId: "533446392320",
+appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
-const snapshot = await getDocs(collection(db,"offers"));
-
-snapshot.forEach((d)=>{
-let o=d.data();
-if(!o.active) return;
-
-let card = `
+onValue(ref(db,"offers"),snap=>{
+let list=document.getElementById("offers");
+list.innerHTML="";
+snap.forEach(child=>{
+let data=child.val();
+if(data.status=="active"){
+list.innerHTML+=`
 <div class="card">
-${o.type==="image" ? `<img src="${o.media}">` : ""}
-${o.type==="video" ? `<iframe src="${o.media}" frameborder="0"></iframe>` : ""}
-<div class="card-body">
-<h3>${o.title}</h3>
-<p>${o.desc}</p>
-<p>👁 ${o.clicks || 0} Clicks</p>
-<button class="join" onclick="openOffer('${d.id}','${o.link}')">🔥 Grab Offer</button>
+<img src="${data.image}" width="100%">
+<h3>${data.title}</h3>
+<a href="${data.link}" target="_blank">
+<button>Grab Offer</button>
+</a>
 </div>
-</div>`;
-
-if(o.featured){
-document.getElementById("featured").innerHTML = `<div class="featured">${card}</div>`;
-}else{
-document.getElementById("offers").innerHTML += card;
+`;
 }
 });
-
-window.openOffer = async function(id,link){
-await updateDoc(doc(db,"offers",id),{
-clicks: increment(1)
 });
+
+onValue(ref(db,"settings/channel"),snap=>{
+if(snap.exists()){
+let link=snap.val().link;
+document.getElementById("joinBtn").onclick=function(){
 window.open(link,"_blank");
 }
-
-window.closePopup = function(){
-document.getElementById("popup").style.visibility="hidden";
 }
+});
 
-setTimeout(()=>{
-document.getElementById("popup").style.visibility="visible";
-},3000);
-
+onValue(ref(db,"broadcast/message"),snap=>{
+if(snap.exists()){
+let msg=snap.val().text;
+document.getElementById("broadcastBox").innerText=msg;
+document.getElementById("broadcastBox").style.display="block";
+}
+});
 </script>
+
+<style>
+body{background:#111;color:white;font-family:Arial;padding:15px}
+.card{background:#1a1a1a;padding:10px;margin:10px 0;border-radius:10px}
+button{background:#00f2ff;color:black;padding:10px;border:none;border-radius:6px}
+#popup{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#00f2ff;
+color:black;
+padding:10px;
+border-radius:8px;
+}
+#broadcastBox{
+background:red;
+padding:10px;
+display:none;
+margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="broadcastBox"></div>
+
+<button id="joinBtn">Join Channel</button>
+
+<div id="offers"></div>
 
 </body>
 </html>
