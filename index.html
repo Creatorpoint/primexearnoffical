@@ -23,15 +23,16 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 onValue(ref(db,"offers"),snap=>{
+let offers=document.getElementById("offers");
 offers.innerHTML="";
 snap.forEach(child=>{
 let d=child.val();
-if(d.status=="active"){
+if(d.status==="active"){
 offers.innerHTML+=`
 <div class="card">
-<img src="${d.image}" width="100%">
+${d.image?`<img src="${d.image}" width="100%">`:""}
 <h2>${d.title}</h2>
-<p>${d.details}</p>
+<p>${d.details||""}</p>
 <a href="${d.link}" target="_blank">
 <button>Grab Offer</button>
 </a>
@@ -43,26 +44,48 @@ offers.innerHTML+=`
 
 onValue(ref(db,"broadcast"),snap=>{
 if(snap.exists()){
-let b=snap.val();
-if(b.active){
-popup.innerHTML=`<h3>${b.title}</h3><p>${b.message}</p><button onclick="closePop()">Close</button>`;
-popup.style.display="block";
+let d=snap.val();
+if(d.active){
+let box=document.getElementById("popup");
+box.innerHTML=`
+<p>${d.message}</p>
+<button onclick="closePop()">Close</button>
+`;
+box.style.display="block";
 }
 }
 });
 
 window.closePop=function(){
-popup.style.display="none";
+document.getElementById("popup").style.display="none";
 }
 </script>
 
 <style>
 body{background:#111;color:white;font-family:Arial;margin:0;padding:15px}
-header{text-align:center;margin-bottom:20px}
-header img{
-width:90px;height:90px;border-radius:50%;
-box-shadow:0 0 25px #00f2ff;
+
+.header{
+text-align:center;
+margin-bottom:20px;
 }
+
+.buttons{
+display:flex;
+gap:10px;
+justify-content:center;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+.buttons a button{
+background:#00f2ff;
+color:black;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+font-weight:bold;
+}
+
 .card{
 background:#1a1a1a;
 padding:15px;
@@ -70,6 +93,7 @@ margin:15px 0;
 border-radius:12px;
 box-shadow:0 0 15px #00f2ff33;
 }
+
 button{
 background:#00f2ff;
 color:black;
@@ -78,27 +102,34 @@ border:none;
 border-radius:8px;
 font-weight:bold;
 }
+
 #popup{
 position:fixed;
-top:50%;
+bottom:20px;
 left:50%;
-transform:translate(-50%,-50%);
+transform:translateX(-50%);
 background:#000;
-padding:20px;
+padding:15px;
 border-radius:12px;
-box-shadow:0 0 30px #00f2ff;
+box-shadow:0 0 25px #00f2ff;
 display:none;
-width:80%;
+width:85%;
+text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<img src="https://files.catbox.moe/zwol8e.jpg">
-<h1>Prime Earn Offers</h1>
-</header>
+<div class="header">
+<h1>Prime Earn</h1>
+</div>
+
+<div class="buttons">
+<a href="https://t.me/+rvPlEQ-0AhlmZjY1" target="_blank"><button>Join Channel</button></a>
+<a href="https://t.me/Primex_Shop07_Bot" target="_blank"><button>Support</button></a>
+<a href="https://t.me/PRIME_X_CHAT2" target="_blank"><button>Join Group</button></a>
+</div>
 
 <div id="offers"></div>
 
