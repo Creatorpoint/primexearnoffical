@@ -2,106 +2,234 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PrimeX Admin</title>
+<title>Prime Earn Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+
 <style>
-body{font-family:Segoe UI;background:#0f172a;color:white;padding:20px;}
-input,textarea,select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:none;}
-button{padding:8px 15px;border:none;border-radius:20px;background:#ff512f;color:white;margin-top:5px;cursor:pointer;}
-.box{background:#1e293b;padding:10px;border-radius:10px;margin-top:10px;}
-#panel{display:none;}
+body{
+margin:0;
+font-family:Arial;
+background:#0f0f0f;
+color:#fff;
+}
+
+header{
+background:#111;
+padding:15px;
+text-align:center;
+box-shadow:0 0 15px #00f2ff;
+}
+
+header img{
+width:60px;
+height:60px;
+border-radius:50%;
+box-shadow:0 0 20px #00f2ff;
+}
+
+.container{
+padding:20px;
+}
+
+input, button{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:8px;
+}
+
+input{
+background:#1f1f1f;
+color:#fff;
+}
+
+button{
+background:#00f2ff;
+color:#000;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#00c4cc;
+}
+
+.offer-card{
+background:#1a1a1a;
+padding:15px;
+margin-top:15px;
+border-radius:10px;
+box-shadow:0 0 10px #00f2ff33;
+}
+
+.status{
+font-size:12px;
+padding:4px 8px;
+border-radius:6px;
+display:inline-block;
+}
+
+.active{
+background:green;
+}
+
+.inactive{
+background:red;
+}
+
+.hidden{
+display:none;
+}
 </style>
 </head>
+
 <body>
 
-<h2>Admin Login</h2>
-<input type="password" id="pass" placeholder="Password">
+<header>
+<img src="https://files.catbox.moe/zwol8e.jpg">
+<h2>Prime Earn Admin Panel</h2>
+</header>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginBox">
+<h3>Admin Login</h3>
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
 <button onclick="login()">Login</button>
+</div>
 
-<div id="panel">
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
 
-<h3>Add Offer</h3>
-<input id="title" placeholder="Title">
-<textarea id="desc" placeholder="Description"></textarea>
-<input id="link" placeholder="Offer Link (with https://)">
+<h3>Add New Offer</h3>
 
-<select id="mediaType">
-<option value="image">Image</option>
-<option value="video">Video</option>
-</select>
+<input type="text" id="title" placeholder="Offer Title">
+<input type="text" id="image" placeholder="Image URL">
+<input type="text" id="video" placeholder="Video URL (optional)">
+<input type="text" id="link" placeholder="Offer Link">
 
-<input type="file" id="mediaInput" accept="image/*,video/*">
-<button onclick="add()">Publish</button>
+<button onclick="addOffer()">Add Offer</button>
 
 <hr>
 
-<h3>Manage Offers</h3>
-<div id="list"></div>
+<h3>Change Password</h3>
+<input type="password" id="newPass" placeholder="New Password">
+<button onclick="changePassword()">Update Password</button>
+
+<hr>
+
+<h3>All Offers</h3>
+<div id="offerList"></div>
 
 </div>
 
-<script>
+</div>
 
-let password = localStorage.getItem("admin_pass") || "1234";
-let offers = JSON.parse(localStorage.getItem("offers")) || [];
+<script type="module">
 
-function login(){
-if(pass.value===password){
-panel.style.display="block";
-render();
-}else{
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCJIU56dxgxS2cIh99zSvp_FAn9hrSSl0g",
+authDomain: "prime-earn-49202.firebaseapp.com",
+databaseURL: "https://prime-earn-49202-default-rtdb.firebaseio.com",
+projectId: "prime-earn-49202",
+storageBucket: "prime-earn-49202.firebasestorage.app",
+messagingSenderId: "533446392320",
+appId: "1:533446392320:web:5cdda6a2fb9a57870eb6e5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Default password
+let ADMIN_PASSWORD = "12345";
+
+// Login
+window.login = function(){
+let pass = document.getElementById("adminPass").value;
+if(pass === ADMIN_PASSWORD){
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+}
+else{
 alert("Wrong Password");
 }
 }
 
-function add(){
-let file = mediaInput.files[0];
-if(!file) return alert("Select file");
-
-if(file.size > 5 * 1024 * 1024){
-return alert("File too large (Max 5MB)");
+// Change Password
+window.changePassword = function(){
+let newPass = document.getElementById("newPass").value;
+if(newPass.length < 4){
+alert("Password too short");
+return;
+}
+ADMIN_PASSWORD = newPass;
+alert("Password Updated");
 }
 
-let reader = new FileReader();
-reader.onload = function(e){
-let o={
-title:title.value,
-desc:desc.value,
-link:link.value,
-media:e.target.result,
-mediaType:mediaType.value,
-active:true
-};
-offers.push(o);
-localStorage.setItem("offers",JSON.stringify(offers));
+// Add Offer
+window.addOffer = function(){
+let title = document.getElementById("title").value;
+let image = document.getElementById("image").value;
+let video = document.getElementById("video").value;
+let link = document.getElementById("link").value;
+
+if(title=="" || link==""){
+alert("Fill required fields");
+return;
+}
+
+push(ref(db,"offers"),{
+title:title,
+image:image,
+video:video,
+link:link,
+status:"active"
+});
+
 alert("Offer Added");
-location.reload();
-};
-reader.readAsDataURL(file);
 }
 
-function render(){
-list.innerHTML="";
-offers.forEach((o,i)=>{
-list.innerHTML+=`
-<div class="box">
-<b>${o.title}</b><br>
-<button onclick="toggle(${i})">${o.active?'Deactivate':'Activate'}</button>
-<button onclick="del(${i})">Delete</button>
+// Load Offers
+const offerList = document.getElementById("offerList");
+
+onValue(ref(db,"offers"),(snapshot)=>{
+offerList.innerHTML="";
+snapshot.forEach((child)=>{
+let data = child.val();
+let key = child.key;
+
+offerList.innerHTML += `
+<div class="offer-card">
+<h4>${data.title}</h4>
+<span class="status ${data.status=='active'?'active':'inactive'}">${data.status}</span>
+<br><br>
+<button onclick="toggleStatus('${key}','${data.status}')">Toggle Active</button>
+<button onclick="deleteOffer('${key}')">Delete</button>
 </div>
 `;
 });
+});
+
+// Toggle Active
+window.toggleStatus = function(key,status){
+let newStatus = status=="active"?"inactive":"active";
+update(ref(db,"offers/"+key),{
+status:newStatus
+});
 }
 
-function toggle(i){
-offers[i].active=!offers[i].active;
-localStorage.setItem("offers",JSON.stringify(offers));
-render();
-}
-
-function del(i){
-offers.splice(i,1);
-localStorage.setItem("offers",JSON.stringify(offers));
-render();
+// Delete Offer
+window.deleteOffer = function(key){
+remove(ref(db,"offers/"+key));
 }
 
 </script>
