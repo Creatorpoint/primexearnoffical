@@ -25,74 +25,74 @@ const db = getDatabase(app);
 let ADMIN_PASSWORD = "12345";
 
 window.login = function(){
-let pass = document.getElementById("pass").value;
-if(pass === ADMIN_PASSWORD){
-document.getElementById("login").style.display="none";
+let pass=document.getElementById("pass").value;
+if(pass===ADMIN_PASSWORD){
+document.getElementById("loginBox").style.display="none";
 document.getElementById("panel").style.display="block";
-}else{
-alert("Wrong Password");
-}
+}else alert("Wrong Password");
 }
 
-window.addOffer = function(){
-let title = document.getElementById("title").value;
-let img = document.getElementById("image").value;
-let link = document.getElementById("link").value;
-
-if(title=="" || link==""){
-alert("Required fields missing");
-return;
-}
+window.addOffer=function(){
+let title=titleInp.value;
+let details=detailsInp.value;
+let img=imageInp.value;
+let link=linkInp.value;
 
 push(ref(db,"offers"),{
 title:title,
+details:details,
 image:img,
 link:link,
 status:"active"
 });
-
 alert("Offer Added");
 }
 
-window.broadcast = function(){
-let msg = document.getElementById("broadcast").value;
-set(ref(db,"broadcast/message"),{
-text:msg,
-time:Date.now()
+window.editOffer=function(id){
+let newTitle=prompt("New Title:");
+let newDetails=prompt("New Details:");
+update(ref(db,"offers/"+id),{
+title:newTitle,
+details:newDetails
 });
-alert("Broadcast Sent");
 }
 
-window.updateChannel = function(){
-let ch = document.getElementById("channel").value;
-set(ref(db,"settings/channel"),{
-link:ch
-});
-alert("Channel Updated");
-}
-
-window.toggleStatus = function(id,status){
+window.toggleStatus=function(id,status){
 update(ref(db,"offers/"+id),{
 status: status=="active"?"inactive":"active"
 });
 }
 
-window.deleteOffer = function(id){
+window.deleteOffer=function(id){
 remove(ref(db,"offers/"+id));
 }
 
+window.sendBroadcast=function(){
+let btitle=bTitle.value;
+let bmsg=bMsg.value;
+let active=bActive.checked;
+
+set(ref(db,"broadcast"),{
+title:btitle,
+message:bmsg,
+active:active
+});
+alert("Broadcast Updated");
+}
+
 onValue(ref(db,"offers"),snap=>{
-let list = document.getElementById("offerList");
-list.innerHTML="";
+offerList.innerHTML="";
 snap.forEach(child=>{
-let data=child.val();
+let d=child.val();
 let id=child.key;
 
-list.innerHTML+=`
+offerList.innerHTML+=`
 <div class="card">
-<h4>${data.title}</h4>
-<p>Status: ${data.status}</p>
-<button onclick="toggleStatus('${id}','${data.status}')">Toggle</button>
+<h3>${d.title}</h3>
+<p>${d.details}</p>
+<p>Status: ${d.status}</p>
+<button onclick="toggleStatus('${id}','${d.status}')">Toggle</button>
+<button onclick="editOffer('${id}')">Edit</button>
 <button onclick="deleteOffer('${id}')">Delete</button>
 </div>
 `;
@@ -101,17 +101,50 @@ list.innerHTML+=`
 </script>
 
 <style>
-body{background:#0f0f0f;color:white;font-family:Arial;padding:20px}
-input,button{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
+body{background:#0f0f0f;color:white;font-family:Arial;margin:0}
+header{
+background:#111;
+text-align:center;
+padding:15px;
+box-shadow:0 0 20px #00f2ff;
+}
+header img{
+width:80px;
+height:80px;
+border-radius:50%;
+box-shadow:0 0 25px #00f2ff;
+}
+.container{padding:20px}
+input,textarea,button{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:8px;
+border:none;
+}
+input,textarea{background:#1a1a1a;color:white}
 button{background:#00f2ff;color:black;font-weight:bold}
-.card{background:#1a1a1a;padding:10px;margin:10px 0;border-radius:8px}
+.card{
+background:#1a1a1a;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 0 10px #00f2ff33;
+}
 </style>
 </head>
 
 <body>
 
-<div id="login">
-<h2>Admin Login</h2>
+<header>
+<img src="https://files.catbox.moe/zwol8e.jpg">
+<h2>Prime Earn Admin</h2>
+</header>
+
+<div class="container">
+
+<div id="loginBox">
+<h3>Admin Login</h3>
 <input type="password" id="pass" placeholder="Password">
 <button onclick="login()">Login</button>
 </div>
@@ -119,22 +152,22 @@ button{background:#00f2ff;color:black;font-weight:bold}
 <div id="panel" style="display:none">
 
 <h3>Add Offer</h3>
-<input id="title" placeholder="Offer Title">
-<input id="image" placeholder="Image URL">
-<input id="link" placeholder="Offer Link">
+<input id="titleInp" placeholder="Offer Title">
+<textarea id="detailsInp" placeholder="Offer Details"></textarea>
+<input id="imageInp" placeholder="Image URL">
+<input id="linkInp" placeholder="Offer Link">
 <button onclick="addOffer()">Add Offer</button>
 
-<h3>Channel Link Update</h3>
-<input id="channel" placeholder="Telegram Channel Link">
-<button onclick="updateChannel()">Update Channel</button>
+<h3>Broadcast System</h3>
+<input id="bTitle" placeholder="Broadcast Title">
+<textarea id="bMsg" placeholder="Broadcast Message"></textarea>
+<label><input type="checkbox" id="bActive"> Activate Broadcast</label>
+<button onclick="sendBroadcast()">Update Broadcast</button>
 
-<h3>Broadcast Message</h3>
-<input id="broadcast" placeholder="Enter Announcement">
-<button onclick="broadcast()">Send Broadcast</button>
-
-<h3>Offers List</h3>
+<h3>All Offers</h3>
 <div id="offerList"></div>
 
+</div>
 </div>
 
 </body>
